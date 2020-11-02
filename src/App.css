@@ -1,0 +1,13 @@
+*{
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100vh;
+  margin: 0;
+  overflow: visible !important;
+}
+
+.app-container{
+  display: flex;
+}

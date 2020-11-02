@@ -1,0 +1,9 @@
+.form-container{
+    background-color:rgb(189, 189, 189);
+    width: 50vw;
+    height: 90vh;
+    margin:2vw;
+    padding:2%;
+    display: flex;
+    justify-content: center;
+}

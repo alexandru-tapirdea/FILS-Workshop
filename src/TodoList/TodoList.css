@@ -1,0 +1,16 @@
+.list-container{
+    background-color:rgb(189, 189, 189);
+    width: 50vw;
+    height: 90vh;
+    margin:2vw;
+    padding-top:20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.todo {
+    margin-top:10px;
+}
