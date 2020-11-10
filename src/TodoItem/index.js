@@ -7,6 +7,7 @@ import {
 import "./TodoItem.css"
 
 const TodoItem = ({ todo, setTodosList, todosList }) => {
+    console.log(todo)
     const [status, setStatus] = useState(false);
     const getButtonText = () => status ? 'Mark as NOT done' : "Mark as done";
     const markAsDone = (event) => {
@@ -22,8 +23,9 @@ const TodoItem = ({ todo, setTodosList, todosList }) => {
         <>
             <Card className={`todo ${todo.category}`}>
                 <CardBody>
-                    <CardTitle className="title">{todo.title}</CardTitle>
+                    <CardTitle className="title">{todo.task}</CardTitle>
                     <CardText>Category: {todo.category}</CardText>
+                    <CardText className="hight">Priority: {todo.priority}</CardText>
                     <Button color="success custom-btn" onClick={markAsDone}>{getButtonText()}</Button>
                     {/* <Button color="info">Edit</Button> */}
                     <Button color="danger custom-btn" onClick={deleteTodo}>Delete</Button>
