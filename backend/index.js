@@ -4,67 +4,83 @@ const port = 3000;
 const bodyParser = require("body-parser");
 const fs = require('fs');
 const cors = require('cors')
+const { v4: uuidv4 } = require('uuid');
 
 app.use(cors())
-
-app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use(bodyParser.json())
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const readFromFile = async (tasks) => {
+    try {
+        const data = await fs.promises.readFile(tasks, 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        throw error;
+    }
 
-let tasks = []
-app.get("/task/getAll", (req, res) => {
-    res.json(tasks.map(x => x));
+}
+
+const writeFile = async (filePath, dataToWrite) => {
+    try {
+        const data = await fs.promises.writeFile(filePath, JSON.stringify(dataToWrite, null, 2));
+        return data;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+app.get("/tasks/getAll", async (req, res) => {
+    const readFile = await readFromFile('tasks.json');
+    res.json(readFile);
 });
 
-const saveToDataBase = []
+app.post("/tasks/createTask", async (req, res) => {
+    let itemIds = uuidv4();
+    const readFile = await readFromFile('tasks.json');
 
-app.post("/task/createTask", (req, res) => {
-
-    let itemIds = tasks.map(x => x.id)
-    let newId = itemIds.length > 0 ? Math.max.apply(Math, itemIds) + 1 : 1;
+    if (!req.body.title || !req.body.deadline || !req.body.priority || !req.body.category) {
+        return res.status(400).send({
+            error: "Please complete all fields!"
+        });
+    }
     const toDo = {
-        id: newId,
-        task: req.body.task,
+        id: itemIds,
+        title: req.body.title,
         deadline: req.body.deadline,
         priority: req.body.priority,
         category: req.body.category,
     }
 
-    tasks.push(toDo);
+    readFile.push(toDo);
+    writeFile('tasks.json', readFile)
 
-    fs.writeFile('tasks.txt', JSON.stringify(tasks, 2, null) + "\n", function (err) {
-        if (err) return console.log(err);
-    });
-
-    res.redirect("/task/getAll");
+    res.status(201).send(readFile);
 });
 
+app.delete("/tasks/delete/:id", async (req, res) => {
+    try {
+        const readFile = await readFromFile('tasks.json');
 
-app.delete("/task/delete/:id", (req, res) => {
-    let found = tasks.find((task) => {
-        return task.id === parseInt(req.params.id)
-    });
-    if (found) {
-        tasks.splice(found, 1);
-
-        const readFile = fs.readFileSync('tasks.txt', 'utf8', function (err, data) {
-            return data;
+        let found = readFile.find((task) => {
+            return task.id === req.params.id
         });
-        const parsedData = JSON.parse(readFile);
-        let foundParsedData = parsedData.find((x) => {
-            return x.id === parseInt(req.params.id)
-        });
-        if (foundParsedData) {
-            parsedData.splice(foundParsedData, 1)
-            fs.writeFile('tasks.txt', JSON.stringify(parsedData, 2, null), function (err) {
-                if (err) return console.log(err);
+        
+        if (!found) {
+            res.status(404).send({
+                error: "Task Not found!"
             });
         }
+
+        const arrayWithoutDeletedTask = readFile.filter(task => task.id !== req.params.id);
+        await writeFile('tasks.json', arrayWithoutDeletedTask);
+        
+        res.status(200).send(arrayWithoutDeletedTask)
+    } catch (error) {
+        res.status(500).send({ error: error.message });
     }
-    res.redirect("/task/getAll");
 })
 
 
