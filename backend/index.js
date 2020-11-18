@@ -1,10 +1,11 @@
 const express = require("express");
-const app = express();
-const port = 3000;
 const bodyParser = require("body-parser");
 const fs = require('fs');
 const cors = require('cors')
 const { v4: uuidv4 } = require('uuid');
+
+const app = express();
+const port = 3000;
 
 app.use(cors())
 
@@ -67,7 +68,7 @@ app.delete("/tasks/delete/:id", async (req, res) => {
         let found = readFile.find((task) => {
             return task.id === req.params.id
         });
-        
+
         if (!found) {
             res.status(404).send({
                 error: "Task Not found!"
@@ -76,7 +77,7 @@ app.delete("/tasks/delete/:id", async (req, res) => {
 
         const arrayWithoutDeletedTask = readFile.filter(task => task.id !== req.params.id);
         await writeFile('tasks.json', arrayWithoutDeletedTask);
-        
+
         res.status(200).send(arrayWithoutDeletedTask)
     } catch (error) {
         res.status(500).send({ error: error.message });
