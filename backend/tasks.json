@@ -4,7 +4,8 @@
     "task": "dasd",
     "deadline": "2-05-2020",
     "priority": "Highsadas",
-    "category": "worksda"
+    "category": "worksda",
+    "isCompleted": true
   },
   {
     "id": "f48694d4-446d-4ef8-91a4-bccd2f0b090b",
