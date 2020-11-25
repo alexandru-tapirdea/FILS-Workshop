@@ -5,22 +5,14 @@ const cors = require('cors')
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-//app == our express app and use diffrient methoeds by express 
 const port = 3000;
 
-//Cors origin resource sharing 
-//iti permite sau nu, aceseara domeniul tau de pe alt domeniu 
-//si pentru porturi diferite
-//why using cors ? 
-//security / for safety / because it's external api 
 app.use(cors());
 
 app.use(bodyParser.json());
 
-//explain what dose bodyparse and urlencoded do with postman  and why we are using it 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//explain about async await and why we are using it 
 
 const readFromFile = async (todo) => {
     try {
