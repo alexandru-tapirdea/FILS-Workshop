@@ -1,21 +1,30 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const fs = require('fs');
+const bodyParser = require("body-parser");
 const cors = require('cors')
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
+//app == our express app and use diffrient methoeds by express 
 const port = 3000;
 
+//Cors origin resource sharing 
+//iti permite sau nu, aceseara domeniul tau de pe alt domeniu 
+//si pentru porturi diferite
+//why using cors ? 
+//security / for safety / because it's external api 
 app.use(cors());
 
 app.use(bodyParser.json());
 
+//explain what dose bodyparse and urlencoded do with postman  and why we are using it 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const readFromFile = async (tasks) => {
+//explain about async await and why we are using it 
+
+const readFromFile = async (todo) => {
     try {
-        const data = await fs.promises.readFile(tasks, 'utf8');
+        const data = await fs.promises.readFile(todo);
         return JSON.parse(data);
     } catch (error) {
         throw error;
@@ -33,14 +42,27 @@ const writeFile = async (filePath, dataToWrite) => {
     }
 }
 
-app.get("/tasks/getAll", async (req, res) => {
-    const tasksList = await readFromFile('tasks.json');
-    res.json(tasksList);
+const readFromTodos = async (filename) => {
+    const readFile = await fs.promises.readFile(filename);
+    return JSON.parse(readFile);
+}
+app.get("/todos/getAll", async (req, res) => {
+    try {
+        const getAllTodos = await readFromTodos('todos.json');
+        return res.json(getAllTodos)
+    } catch (error) {
+        res.status(500).send(error)
+    }
+})
+
+app.get("/todos/getAll", async (req, res) => {
+    const todosList = await readFromFile('todos.json');
+    res.json(todosList);
 });
 
-app.post("/tasks/createTask", async (req, res) => {
-    let itemIds = uuidv4();
-    const tasksList = await readFromFile('tasks.json');
+app.post("/todos/createTodo", async (req, res) => {
+    let todoIds = uuidv4();
+    const todosList = await readFromFile('todos.json');
 
     if (!req.body.title || !req.body.deadline || !req.body.priority || !req.body.category) {
         return res.status(400).send({
@@ -48,7 +70,7 @@ app.post("/tasks/createTask", async (req, res) => {
         });
     }
     const toDo = {
-        id: itemIds,
+        id: todoIds,
         title: req.body.title,
         deadline: req.body.deadline,
         priority: req.body.priority,
@@ -56,46 +78,49 @@ app.post("/tasks/createTask", async (req, res) => {
         isCompleted: false
     }
 
-    tasksList.push(toDo);
-    writeFile('tasks.json', tasksList);
+    todosList.push(toDo);
+    writeFile('todos.json', todosList);
 
-    res.status(201).send(tasksList);
+    res.status(201).send(todosList);
 });
 
-app.put("/tasks/setstatus/:id", async (req, res) => {
-    const tasksList = await readFromFile('tasks.json');
+app.put("/todos/setstatus/:id", async (req, res) => {
+    const todosList = await readFromFile('todos.json');
 
 
-    const filterTask = tasksList.findIndex(task => task.id === req.params.id);
+    const filterTodo = todosList.findIndex(todo => todo.id === req.params.id);
 
 
-    if (filterTask === -1) {
+    if (filterTodo === -1) {
         res.status(404).send({
-            error: "Task Not found!"
+            error: "ToDo Not found!"
         });
     }
+    if (todosList[filterTodo].isCompleted === false) {
+        todosList[filterTodo].isCompleted = true;
+    } else {
+        todosList[filterTodo].isCompleted = false;
+    }
 
-    tasksList[filterTask].isCompleted = true;
+    await writeFile('todos.json', todosList);
 
-    await writeFile('tasks.json', tasksList);
-
-    res.status(200).send(tasksList[filterTask]);
+    res.status(200).send(todosList[filterTodo]);
 })
 
-app.delete("/tasks/delete/:id", async (req, res) => {
+app.delete("/todos/delete/:id", async (req, res) => {
     try {
-        const tasksList = await readFromFile('tasks.json');
+        const todosList = await readFromFile('todos.json');
 
-        let found = tasksList.find((task) => task.id === req.params.id);
+        let found = todosList.find((todo) => todo.id === req.params.id);
 
         if (!found) {
             res.status(404).send({
-                error: "Task Not found!"
+                error: "ToDo Not found!"
             });
         }
 
-        const arrayWithoutDeletedTask = tasksList.filter(task => task.id !== req.params.id);
-        await writeFile('tasks.json', arrayWithoutDeletedTask);
+        const arrayWithoutDeletedTodo = todosList.filter(todo => todo.id !== req.params.id);
+        await writeFile('todos.json', arrayWithoutDeletedTodo);
 
         res.status(200).send(found);
     } catch (error) {
