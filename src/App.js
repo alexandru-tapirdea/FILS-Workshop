@@ -7,12 +7,8 @@ function App() {
   const [todosList, setTodosList] = useState([])
 
   const getDataFromServer = async () => {
-    const response = await fetch("http://localhost:3001/todos/getAll", {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    })
+    const response = await fetch("http://localhost:3001/todos/getAll")
+
     const data = await response.json();
     setTodosList(data);
   }
