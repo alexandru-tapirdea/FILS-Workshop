@@ -2,25 +2,22 @@
     margin-left:10px;
 }
 
-.title{
+.bold{
     font-weight: bold;
 }
 
-.Family{
-    background-color: rgb(127, 176, 255);
+.Low{
+    background-color: rgb(65, 250, 179);
 }
 
-.Work{
-    background-color: rgb(255, 154, 247);
+.Medium{
+    background-color: rgb(255, 199, 154);
 }
 
-.University{
-    background-color: rgb(255, 204, 108);
+.High{
+    background-color: rgb(255, 149, 237);
 }
 
-.Sport{
-    background-color:rgb(217, 255, 127);
-}
 
 .done{
     opacity: 50%;

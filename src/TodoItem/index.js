@@ -4,34 +4,65 @@ import {
     CardTitle, Button
 } from 'reactstrap';
 
+import Swal from 'sweetalert2'
+
 import "./TodoItem.css"
 
-const TodoItem = ({ todo, setTodosList, todosList }) => {
-    const [status, setStatus] = useState(false);
-    const getButtonText = () => status ? 'Mark as NOT done' : "Mark as done";
-    const markAsDone = (event) => {
-        setStatus(!status);
-        event.target.parentElement.parentElement.classList.toggle("done");
+const TodoItem = ({ todo, getDataFromServer }) => {
+    const [isDone, setIsDone] = useState(todo.isCompleted);
+    const getButtonText = () => todo.isCompleted ? 'Mark as NOT done' : "Mark as done";
+
+    const markAsDone = async (event, id) => {
+        const response = await fetch(`http://localhost:3001/todos/setStatus/${id}`, {
+            method: 'PUT',
+        });
+        if (response.ok) {
+            // update the list
+            todo.isCompleted = !todo.isCompleted;
+            setIsDone(!isDone);
+        }
+        else {
+            alert("Something went wrong !")
+        }
     }
 
-    const deleteTodo = () => {
-        setTodosList(todosList.filter(todoItem => todoItem.title !== todo.title))
+
+    const deleteTodo = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:3001/todos/delete/${id}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                // update the list
+                await getDataFromServer();
+            }
+            else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Something went wrong while deleting this todo.',
+                    icon: 'error',
+                    confirmButtonText: 'Cool'
+                })
+            }
+        } catch (error) {
+            console.log("TodoItem -> error", error)
+        }
     }
 
     return (
-        <>
-            <Card className={`todo ${todo.category}`}>
+        <div className={todo.isCompleted ? 'done' : ''}>
+            <Card className={`todo ${todo.priority} `}>
                 <CardBody>
-                    <CardTitle className="title">{todo.title}</CardTitle>
-                    <CardText>Category: {todo.category}</CardText>
-                    <Button color="success custom-btn" onClick={markAsDone}>{getButtonText()}</Button>
-                    {/* <Button color="info">Edit</Button> */}
-                    <Button color="danger custom-btn" onClick={deleteTodo}>Delete</Button>
+                    <CardTitle className="bold">{todo.title}</CardTitle>
+                    <CardText>Category: <span className="bold">{todo.category}</span></CardText>
+                    <CardText >Priority: <span className="bold">{todo.priority}</span></CardText>
+                    <Button color="success custom-btn" onClick={(event) => markAsDone(event, todo.id)}>{getButtonText()}</Button>
+                    <Button color="danger custom-btn" onClick={() => deleteTodo(todo.id)}>Delete</Button>
 
                 </CardBody>
                 <CardFooter>{todo.deadline}</CardFooter>
             </Card>
-        </>
+        </div>
     );
 };
 

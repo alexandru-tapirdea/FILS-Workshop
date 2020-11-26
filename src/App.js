@@ -1,37 +1,24 @@
 import './App.css';
 import AddTodoForm from "./AddTodoForm"
 import TodoList from './TodoList';
-import React, { useState } from "react"
-const data = [
-  {
-    title: "Test",
-    category: "University",
-    deadline: "2020-10-03"
-  },
-  {
-    title: "Test 2",
-    category: "Work",
-    deadline: "2020-10-03"
-  },
-  {
-    title: "Test 3",
-    category: "Family",
-    deadline: "2020-10-03"
-  },
-  {
-    title: "Test 4",
-    category: "Sport",
-    deadline: "2020-10-03"
-  }
-];
-
+import React, { useEffect, useState } from "react";
 
 function App() {
-  const [todosList, setTodosList] = useState(data)
+  const [todosList, setTodosList] = useState([])
+
+  const getDataFromServer = async () => {
+    const response = await fetch("http://localhost:3001/todos/getAll")
+
+    const data = await response.json();
+    setTodosList(data);
+  }
+
+  useEffect(() => getDataFromServer(), []);
+
   return (
     <div className="app-container">
       <AddTodoForm setTodosList={setTodosList} todosList={todosList} />
-      <TodoList todosList={todosList} setTodosList={setTodosList} />
+      <TodoList todosList={todosList} setTodosList={setTodosList} getDataFromServer={getDataFromServer} />
     </div>
   );
 }
